@@ -1,13 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <!-- Required meta tags -->
     <meta charset="utf-8">
-    <title>주소를 마커로 띄우기</title>
-    <!--    jQuery-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <!--    카카오 지도 api-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey={{CLIENT_ID}}&libraries=services"></script>
+<title>주소를 마커로 띄우기</title>
+</head>
+
+<body>
+    <!--    카카오 지도 api-->
+
     <script>
+        $(document).ready(function () {
+            makeGuMarker()
+        });
+
+
         // 지도에 표시된 마커 객체를 가지고 있을 배열입니다
         var markers = [];
 
@@ -17,145 +40,110 @@
                 markers[i].setMap(map);
             }
         }
-        //"도봉구 맛집", "노원구 맛집",
 
-        function getDataDoBong() {
-            $.ajax({
-                type: "GET",
-                url: "/map/dobong",
-                data: {},
-                success: function (response) {
-                    setMarkers(null);
-                    let shopdatas = response["shopdatas"]
-                    for (let i = 0; i < shopdatas.length; i++) {
+        // 구 마커 만들기. 클릭시 마커 생성!!
+        function makeGuMarker() {
+            // 작업해야할 구
+            const seoul_gus = ["도봉구", "노원구", "강북구", "은평구", "성북구", "중랑구", "동대문구", "종로구", "서대문구",
+                "중구", "성동구", "광진구", "용산구", "마포구", "강서구", "양천구", "구로구", "영등포구", "동작구", "금천구",
+                "관악구", "서초구", "강남구", "송파구", "강동구"]
 
-                        let gu = shopdatas[i]["gu"]
-                        if (gu === "도봉구"){
-                            let address = shopdatas[i]["address"]
-                        let name = shopdatas[i]["name"]
-                        let link = shopdatas[i]["link"]
-                        // 주소로 좌표를 검색합니다
-                        geocoder.addressSearch(address, function (result, status) {
+            for (let i = 0; i < seoul_gus.length; i++) {
+                // 주소로 좌표를 검색합니다
+                geocoder.addressSearch(seoul_gus[i], function (result, status) {
 
-                            // 정상적으로 검색이 완료됐으면
-                            if (status === kakao.maps.services.Status.OK) {
+                    // 정상적으로 검색이 완료됐으면
+                    if (status === kakao.maps.services.Status.OK) {
 
-                                var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                        var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
 
-                                // 결과값으로 받은 위치를 마커로 표시합니다
-                                var marker = new kakao.maps.Marker({
-                                    map: map,
-                                    position: coords,
-                                    clickable: true
-                                });
-
-                                // 인포윈도우로 장소에 대한 설명을 표시합니다
-                                var infowindow = new kakao.maps.InfoWindow({
-                                    content: `<div style="width:150px;text-align:center;padding:6px 0;">${name}</div>`
-                                });
-
-                                kakao.maps.event.addListener(marker, 'mouseover', function () {
-                                    // 마커에 마우스오버 이벤트가 발생하면 인포윈도우를 마커위에 표시합니다
-                                    infowindow.open(map, marker);
-                                });
-
-                                // 마커에 마우스아웃 이벤트를 등록합니다
-                                kakao.maps.event.addListener(marker, 'mouseout', function () {
-                                    // 마커에 마우스아웃 이벤트가 발생하면 인포윈도우를 제거합니다
-                                    infowindow.close();
-                                });
-
-                                // 마커에 클릭이벤트를 등록합니다
-                                kakao.maps.event.addListener(marker, 'click', function () {
-                                    // 해당 링크로 이동합니다
-                                    window.open(`${link}`)
-                                    ;
-                                });
-                                // 생성된 마커를 배열에 추가합니다
-                                markers.push(marker);
-                            }
+                        // 결과값으로 받은 위치를 마커로 표시합니다
+                        var marker = new kakao.maps.Marker({
+                            map: map,
+                            position: coords
                         });
-                        }
 
-
-                    }
-                }
-            })
-    }
-    function getDataNoWon(){
-            $.ajax({
-                type: "GET",
-                url: "/map/nowon",
-                data: {},
-                success: function (response) {
-                    setMarkers(null);
-                    let shopdatas = response["shopdatas"]
-                    for (let i = 0; i < shopdatas.length; i++) {
-
-                        let gu = shopdatas[i]["gu"]
-                        if (gu === "노원구"){
-                            let address = shopdatas[i]["address"]
-                        let name = shopdatas[i]["name"]
-                        let link = shopdatas[i]["link"]
-                        // 주소로 좌표를 검색합니다
-                        geocoder.addressSearch(address, function (result, status) {
-
-                            // 정상적으로 검색이 완료됐으면
-                            if (status === kakao.maps.services.Status.OK) {
-
-                                var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-
-                                // 결과값으로 받은 위치를 마커로 표시합니다
-                                var marker = new kakao.maps.Marker({
-                                    map: map,
-                                    position: coords,
-                                    clickable: true
-                                });
-
-                                // 인포윈도우로 장소에 대한 설명을 표시합니다
-                                var infowindow = new kakao.maps.InfoWindow({
-                                    content: `<div style="width:150px;text-align:center;padding:6px 0;">${name}</div>`
-                                });
-
-                                kakao.maps.event.addListener(marker, 'mouseover', function () {
-                                    // 마커에 마우스오버 이벤트가 발생하면 인포윈도우를 마커위에 표시합니다
-                                    infowindow.open(map, marker);
-                                });
-
-                                // 마커에 마우스아웃 이벤트를 등록합니다
-                                kakao.maps.event.addListener(marker, 'mouseout', function () {
-                                    // 마커에 마우스아웃 이벤트가 발생하면 인포윈도우를 제거합니다
-                                    infowindow.close();
-                                });
-
-                                // 마커에 클릭이벤트를 등록합니다
-                                kakao.maps.event.addListener(marker, 'click', function () {
-                                    // 해당 링크로 이동합니다
-                                    window.open(`${link}`)
-                                    ;
-                                });
-                                // 생성된 마커를 배열에 추가합니다
-                                markers.push(marker);
-                            }
+                        // 인포윈도우로 장소에 대한 설명을 표시합니다
+                        var infowindow = new kakao.maps.InfoWindow({
+                            content: `<div style="width: 150px;text-align: center">${seoul_gus[i]}</div>`
                         });
-                        }
+                        infowindow.open(map, marker);
+
+                        kakao.maps.event.addListener(marker, 'click', function () {
+                            // 해당 구의 맛집 표시하기
+                            $.ajax({
+                                type: "GET",
+                                url: "/map/marker",
+                                data: {},
+                                success: function (response) {
+                                    setMarkers(null);
+                                    let shopdatas = response["shopdatas"]
+                                    for (let n = 0; n < shopdatas.length; n++) {
+
+                                        let gu = shopdatas[n]["gu"]
+                                        if (gu === seoul_gus[i]) {
+                                            let address = shopdatas[n]["address"]
+                                            let name = shopdatas[n]["name"]
+                                            let link = shopdatas[n]["link"]
+                                            // 주소로 좌표를 검색합니다
+                                            geocoder.addressSearch(address, function (result, status) {
+
+                                                // 정상적으로 검색이 완료됐으면
+                                                if (status === kakao.maps.services.Status.OK) {
+
+                                                    var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+
+                                                    // 결과값으로 받은 위치를 마커로 표시합니다
+                                                    var marker = new kakao.maps.Marker({
+                                                        map: map,
+                                                        position: coords,
+                                                        clickable: true
+                                                    });
+
+                                                    // 인포윈도우로 장소에 대한 설명을 표시합니다
+                                                    var infowindow = new kakao.maps.InfoWindow({
+                                                        content: `<div style="width:150px;text-align:center;padding:6px 0;">${name}</div>`
+                                                    });
+
+                                                    kakao.maps.event.addListener(marker, 'mouseover', function () {
+                                                        // 마커에 마우스오버 이벤트가 발생하면 인포윈도우를 마커위에 표시합니다
+                                                        infowindow.open(map, marker);
+                                                    });
+
+                                                    // 마커에 마우스아웃 이벤트를 등록합니다
+                                                    kakao.maps.event.addListener(marker, 'mouseout', function () {
+                                                        // 마커에 마우스아웃 이벤트가 발생하면 인포윈도우를 제거합니다
+                                                        infowindow.close();
+                                                    });
+
+                                                    // 마커에 클릭이벤트를 등록합니다
+                                                    kakao.maps.event.addListener(marker, 'click', function () {
+                                                        // 해당 링크로 이동합니다
+                                                        window.open(`${link}`)
+                                                        ;
+                                                    });
+                                                    // 생성된 마커를 배열에 추가합니다
+                                                    markers.push(marker);
+                                                }
+                                            });
+                                        }
 
 
+                                    }
+                                }
+                            })
+                        });
                     }
-                }
-            })
+                });
+            }
+        }
 
-    }
 </script>
-</head>
-<body>
     <div id="map" style="width:800px;height:800px;"></div>
-    <button type="button" onclick="getDataDoBong()">도봉구</button>
-    <button type="button" onclick="getDataNoWon()">노원구</button>
 </body>
 
-
 <script>
+                // 카카오 지도 만들기
     var mapContainer = document.getElementById('map'),
         // 지도를 표시할 div
         mapOption = {
@@ -168,8 +156,5 @@
 
     // 주소-좌표 변환 객체를 생성합니다
     var geocoder = new kakao.maps.services.Geocoder();
-
-    // 마커에 마우스오버 이벤트를 등록합니다
-
 </script>
 </html>

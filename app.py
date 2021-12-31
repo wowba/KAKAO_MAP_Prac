@@ -27,16 +27,8 @@ def home():
 # api
 
 # 데이터 가져오기
-#도봉구
-@app.route("/map/dobong", methods=["GET"])
-def dobong():
-    shopdata = list(db.shops.find({},{"_id":False}))
-
-    return jsonify({"shopdatas":shopdata})
-
-#노원구
-@app.route("/map/nowon", methods=["GET"])
-def nowon():
+@app.route("/map/marker", methods=["GET"])
+def marker():
     shopdata = list(db.shops.find({},{"_id":False}))
 
     return jsonify({"shopdatas":shopdata})
